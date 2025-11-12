@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arslan-Temp-Numbers – VIP OTP Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(90deg, #FFD700, #8E2DE2);
+      --primary-color: #FFD700;
+      --bg-dark: #0b0b0d;
+      --bg-light: #18181b;
+      --bg-lighter: #242427;
+      --border-color: #333;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+    .table-container { max-height: 70vh; overflow-y: auto; }
+
+    /* VIP gold shimmer */
+    .vip-title {
+      font-weight: 900;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #FFD700, #FFAA00, #8E2DE2, #4A00E0, #FFD700);
+      background-size: 400% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 7s linear infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 400% 50%; }
+    }
+
+    .btn-gradient {
+      background: var(--primary-gradient);
+      color: #000;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-gradient:hover { opacity: 0.9; }
+
+    .spinning { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-content {
+      background: var(--bg-light);
+      border: 1px solid var(--border-color);
+      border-top: 4px solid var(--primary-color);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .gemini-title {
+      background: linear-gradient(90deg, #4285F4, #34A853, #FBBC05, #EA4335);
+      background-size: 400% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 7s linear infinite;
+    }
+
+    .premium-badge {
+      background: linear-gradient(45deg, #FFD700, #FFAA00, #FFD700);
+      color: black;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      margin-left: 8px;
+    }
+
+    .floating-notification {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--bg-light);
+      border: 1px solid var(--primary-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Poppins','sans-serif'] },
+          colors: {
+            'primary-color': 'var(--primary-color)',
+            'bg-dark': 'var(--bg-dark)',
+            'bg-light': 'var(--bg-light)',
+            'bg-lighter': 'var(--bg-lighter)',
+            'border-color': 'var(--border-color)',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-bg-dark text-gray-100 min-h-screen p-4 font-sans">
+  <div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row justify-between items-center py-4 border-b border-border-color gap-4">
+      <div class="flex items-center">
+        <h1 class="text-3xl font-extrabold vip-title">
+          💎 Arslan-Temp-Numbers – VIP OTP Hub 💎
+        </h1>
+        <span class="premium-badge">UNLIMITED OTPS</span>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <select id="countrySelect"
+          class="w-full sm:w-auto bg-bg-light border border-border-color text-gray-200 text-sm rounded-lg focus:ring-primary-color focus:border-primary-color p-1.5">
+          <option value="random">Select Country</option>
+        </select>
+
+        <button id="generateBtn"
+          class="px-3 py-1.5 bg-bg-light border border-border-color hover:border-primary-color text-white text-sm font-semibold rounded-lg shadow-lg transition duration-200 disabled:opacity-50 disabled:cursor-wait flex items-center justify-center">
+          <i data-feather="gift" class="w-4 h-4 mr-2"></i>
+          <span>Generate Number</span>
+        </button>
+
+        <button id="refreshSmsBtn"
+          class="px-4 py-1.5 btn-gradient rounded-lg shadow-lg flex items-center justify-center disabled:opacity-50 disabled:cursor-wait">
+          <i id="refreshSmsIcon" data-feather="refresh-cw" class="w-4 h-4 mr-2"></i>
+          <span>Refresh SMS</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Premium Stats Dashboard -->
+    <div class="bg-gradient-to-r from-purple-900 to-blue-900 p-6 rounded-xl shadow-2xl border border-purple-500">
+      <h2 class="text-2xl font-bold text-white mb-4 flex items-center">
+        <i data-feather="bar-chart-2" class="w-6 h-6 mr-2 text-yellow-400"></i>
+        📊 Premium Live Stats
+      </h2>
+      
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="text-center p-4 bg-black bg-opacity-40 rounded-lg">
+          <div class="text-2xl font-bold text-yellow-400" id="totalNumbers">0</div>
+          <div class="text-sm text-gray-300">Total Numbers</div>
+        </div>
+        <div class="text-center p-4 bg-black bg-opacity-40 rounded-lg">
+          <div class="text-2xl font-bold text-green-400" id="activeNumbers">0</div>
+          <div class="text-sm text-gray-300">Active Now</div>
+        </div>
+        <div class="text-center p-4 bg-black bg-opacity-40 rounded-lg">
+          <div class="text-2xl font-bold text-blue-400" id="totalSMS">0</div>
+          <div class="text-sm text-gray-300">SMS Today</div>
+        </div>
+        <div class="text-center p-4 bg-black bg-opacity-40 rounded-lg">
+          <div class="text-2xl font-bold text-purple-400" id="successRate">100%</div>
+          <div class="text-sm text-gray-300">Success Rate</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Features Grid -->
+    <div class="mt-6">
+      <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+        <i data-feather="star" class="w-6 h-6 mr-2 text-yellow-400"></i>
+        ⚡ Arslan-MD Premium Features
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="bg-gradient-to-br from-gray-900 to-black p-6 rounded-xl border border-purple-500 hover:border-yellow-400 transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center mr-4">
+              <i data-feather="zap" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Auto Refresh</h3>
+          </div>
+          <p class="text-gray-300 mb-4">Automatic SMS updates every 30 seconds</p>
+          <button onclick="toggleAutoRefresh()" id="autoRefreshBtn" 
+                  class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-2 rounded-lg transition duration-200">
+            <i data-feather="refresh-cw" class="w-4 h-4 inline mr-2"></i>
+            Enable Auto-Refresh
+          </button>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="bg-gradient-to-br from-gray-900 to-black p-6 rounded-xl border border-blue-500 hover:border-yellow-400 transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+              <i data-feather="search" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Smart Search</h3>
+          </div>
+          <p class="text-gray-300 mb-4">Find specific OTPs & services instantly</p>
+          <div class="flex gap-2">
+            <input type="text" id="searchSMS" placeholder="Search messages..." 
+                   class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white placeholder-gray-400">
+            <button onclick="searchMessages()" class="bg-blue-600 hover:bg-blue-700 px-4 rounded-lg transition duration-200">
+              <i data-feather="search" class="w-4 h-4 text-white"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="bg-gradient-to-br from-gray-900 to-black p-6 rounded-xl border border-green-500 hover:border-yellow-400 transition-all duration-300">
+          <div class="flex items-center mb-4">
+            <div class="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
+              <i data-feather="download" class="w-6 h-6 text-white"></i>
+            </div>
+            <h3 class="text-xl font-bold text-white">Export Data</h3>
+          </div>
+          <p class="text-gray-300 mb-4">Download SMS history as CSV/JSON</p>
+          <div class="flex gap-2">
+            <button onclick="exportData('csv')" class="flex-1 bg-green-600 hover:bg-green-700 py-2 rounded-lg transition duration-200">
+              CSV
+            </button>
+            <button onclick="exportData('json')" class="flex-1 bg-purple-600 hover:bg-purple-700 py-2 rounded-lg transition duration-200">
+              JSON
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="mt-6 bg-gradient-to-r from-yellow-600 to-red-600 p-4 rounded-xl">
+      <div class="flex flex-wrap gap-4 justify-center">
+        <button onclick="copyCurrentNumber()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center">
+          <i data-feather="copy" class="w-4 h-4 mr-2"></i>
+          Copy Number
+        </button>
+        <button onclick="clearAllData()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center">
+          <i data-feather="trash-2" class="w-4 h-4 mr-2"></i>
+          Clear Data
+        </button>
+        <button onclick="showHelp()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center">
+          <i data-feather="help-circle" class="w-4 h-4 mr-2"></i>
+          Help Guide
+        </button>
+        <button onclick="showSupport()" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-6 py-3 rounded-lg font-semibold transition duration-200 flex items-center">
+          <i data-feather="heart" class="w-4 h-4 mr-2"></i>
+          Support
+        </button>
+      </div>
+    </div>
+
+    <!-- Number Display Card -->
+    <div class="bg-bg-light p-6 rounded-xl shadow-xl border-t-4 border-primary-color">
+        <h2 class="text-xl font-semibold text-gray-300 mb-2 flex items-center">
+            <i data-feather="smartphone" class="w-6 h-6 mr-2 text-primary-color"></i>
+            Selected Number
+        </h2>
+        <div id="randomNumberDisplay" class="py-2 text-center">
+            <p class="text-4xl sm:text-5xl font-mono font-bold text-primary-color">Loading...</p>
+        </div>
+        <p id="numberError" class="text-red-500 text-center hidden"></p>
+    </div>
+
+    <!-- SMS OTP Table Section -->
+    <section>
+        <h2 class="text-2xl font-bold text-gray-200 mb-4">
+            Recent Incoming OTP Messages (SMS)
+        </h2>
+        <div id="smsStatus" class="text-yellow-500 text-center py-4">Loading SMS data...</div>
+        
+        <div class="table-container bg-bg-light rounded-xl shadow-xl">
+            <table class="min-w-full divide-y divide-border-color">
+                <thead class="bg-bg-lighter sticky top-0 z-10">
+                    <tr>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden sm:table-cell">Timestamp</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Country / Phone</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider hidden md:table-cell">Service</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Message</th>
+                        <th class="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Analyze</th>
+                    </tr>
+                </thead>
+                <tbody id="otpTableBody" class="divide-y divide-border-color">
+                    <!-- Rows will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+        <p id="smsError" class="text-red-500 text-center pt-4 hidden"></p>
+    </section>
+
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-border-color pt-8 pb-4 text-center text-gray-400">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="text-left">
+          <h3 class="text-lg font-bold text-white mb-2">Arslan-Temp-Numbers</h3>
+          <p class="text-sm">Premium Temporary Numbers Service</p>
+          <p class="text-xs mt-2">Developed by: <span class="text-primary-color">ArslanMD Official</span></p>
+        </div>
+        
+        <div class="flex flex-col gap-2">
+          <a href="https://wa.me/message/VRZ5QLDAHXKSF1" 
+             class="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition duration-200">
+            <i data-feather="message-circle" class="w-4 h-4"></i>
+            Contact on WhatsApp
+          </a>
+          <a href="https://whatsapp.com/channel/0029VarfjW04tRrmwfb8x306" 
+             class="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition duration-200">
+            <i data-feather="users" class="w-4 h-4"></i>
+            Join Support Channel
+          </a>
+        </div>
+      </div>
+      
+      <div class="mt-6 text-xs">
+        <p>© 2024 Arslan-Temp-Numbers. All rights reserved. | Premium OTP Service</p>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- AI Analysis Modal -->
+  <div id="aiModal" class="modal-backdrop" onclick="closeAiModal()">
+      <div class="modal-content" onclick="event.stopPropagation()">
+          <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold gemini-title">AI Analysis</h3>
+              <button onclick="closeAiModal()" class="text-gray-400 hover:text-white">
+                  <i data-feather="x" class="w-6 h-6"></i>
+              </button>
+          </div>
+          <div id="aiModalContent" class="text-gray-300 space-y-4">
+              <!-- AI result will be injected here -->
+          </div>
+      </div>
+  </div>
+
+  <!-- Floating Notification -->
+  <div id="floatingNotification" class="floating-notification">
+    <div class="flex items-center">
+      <i data-feather="check-circle" class="w-5 h-5 text-green-400 mr-2"></i>
+      <span id="notificationText">Operation completed successfully!</span>
+    </div>
+  </div>
+
+  <!-- ✅ Monetag Ads -->
+  <meta name="monetag" content="b805f1bd7c6023d0341a4d15bd8fe547">
+  <script src="https://fpyf8.com/88/tag.min.js" data-zone="174168" async data-cfasync="false"></script>
+
+  <script>
+    // API Endpoints
+    const CORS_PROXY = "https://corsproxy.io/?"; 
+    const API_NUMBERS = CORS_PROXY + encodeURIComponent("https://www.kamibroken.pw/api/otp?type=numbers");
+    const API_SMS = CORS_PROXY + encodeURIComponent("https://www.kamibroken.pw/api/otp?type=sms&iDisplayLength=10000");
+
+    // UI Element IDs
+    const generateBtn = document.getElementById('generateBtn');
+    const refreshSmsBtn = document.getElementById('refreshSmsBtn');
+    const refreshSmsIcon = document.getElementById('refreshSmsIcon');
+    const countrySelect = document.getElementById('countrySelect');
+    const randomNumberDisplay = document.getElementById('randomNumberDisplay');
+    const otpTableBody = document.getElementById('otpTableBody');
+    const smsStatus = document.getElementById('smsStatus');
+    const numberError = document.getElementById('numberError');
+    const smsError = document.getElementById('smsError');
+    const geminiKeyInput = document.getElementById('geminiKey');
+    const aiModal = document.getElementById('aiModal');
+    const aiModalContent = document.getElementById('aiModalContent');
+    const floatingNotification = document.getElementById('floatingNotification');
+    const notificationText = document.getElementById('notificationText');
+    
+    let allNumbersData = [];
+    let autoRefreshInterval = null;
+    let currentNumber = '';
+
+    // Premium Stats
+    function updatePremiumStats() {
+      document.getElementById('totalNumbers').textContent = allNumbersData.length;
+      document.getElementById('activeNumbers').textContent = Math.floor(allNumbersData.length * 0.7); // Simulate active numbers
+      document.getElementById('totalSMS').textContent = document.querySelectorAll('#otpTableBody tr').length;
+      document.getElementById('successRate').textContent = '98%';
+    }
+
+    // Floating Notification
+    function showNotification(message, isError = false) {
+      notificationText.textContent = message;
+      floatingNotification.style.borderColor = isError ? '#EF4444' : '#10B981';
+      floatingNotification.style.display = 'block';
+      
+      setTimeout(() => {
+        floatingNotification.style.display = 'none';
+      }, 3000);
+    }
+
+    /**
+     * Utility function to safely extract the country name.
+     */
+    function extractCountryName(groupString) {
+        if (!groupString || typeof groupString !== 'string') return 'Unknown Country';
+        return groupString.split('-')[0].trim();
+    }
+    
+    /**
+     * ✅ FIX: Masks a phone number (e.g., 1234XXXX890)
+     */
+    function maskNumber(numberStr) {
+        if (!numberStr || typeof numberStr !== 'string' || numberStr.length <= 7) {
+            return numberStr || 'N/A';
+        }
+        const firstFour = numberStr.substring(0, 4);
+        const lastThree = numberStr.substring(numberStr.length - 3);
+        const middleLength = numberStr.length - 7;
+        const middleMask = '×'.repeat(middleLength > 0 ? middleLength : 0);
+        
+        return `${firstFour}${middleMask}${lastThree}`;
+    }
+
+    /**
+     * Sets the loading state for the SMS refresh button.
+     */
+    function setSmsLoading(isLoading) {
+        refreshSmsBtn.disabled = isLoading;
+        refreshSmsBtn.querySelector('span').textContent = isLoading ? 'Loading SMS...' : 'Refresh SMS';
+        refreshSmsIcon.classList.toggle('spinning', isLoading);
+    }
+
+    /**
+     * Fetches the entire list of numbers once and populates the filter.
+     */
+    async function fetchNumbersList() {
+        generateBtn.disabled = true;
+        randomNumberDisplay.innerHTML = '<p class="text-lg font-mono font-bold text-primary-color">Loading number list...</p>';
+        numberError.classList.add('hidden');
+
+        try {
+            const response = await fetch(API_NUMBERS);
+            if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+            const data = await response.json();
+
+            if (data && data.aaData && data.aaData.length > 0) {
+                allNumbersData = data.aaData.filter(row => row.length > 2 && row[2] && row[2].trim().length > 0);
+                
+                if (allNumbersData.length === 0) {
+                    throw new Error("No valid phone numbers found.");
+                }
+                
+                populateCountryFilter(allNumbersData);
+                displayNewNumber(); // Display a random one immediately
+                updatePremiumStats();
+                
+            } else {
+                throw new Error("API data is empty or malformed.");
+            }
+        } catch (error) {
+            console.error("Error fetching number list:", error);
+            randomNumberDisplay.innerHTML = '<p class="text-xl font-mono font-bold text-red-500">Error loading list</p>';
+            numberError.textContent = `Could not load numbers: ${error.message}.`;
+            numberError.classList.remove('hidden');
+        } finally {
+            generateBtn.disabled = false;
+        }
+    }
+    
+    /**
+     * Populates the country select dropdown
+     */
+    function populateCountryFilter(validData) {
+        const countries = [...new Set(validData.map(row => extractCountryName(row[0])))].sort();
+        
+        let countryOptions = '<option value="random">Select Country</option>';
+        countries.forEach(country => {
+            countryOptions += `<option value="${country}">${country}</option>`;
+        });
+        countrySelect.innerHTML = countryOptions;
+    }
+
+    /**
+     * ✅ FIX: Displays a new FULL (unmasked) number based on the filter.
+     */
+    function displayNewNumber() {
+        if (allNumbersData.length === 0) {
+            numberError.textContent = 'Number list is empty. Please refresh.';
+            numberError.classList.remove('hidden');
+            return;
+        }
+        
+        const selectedCountry = countrySelect.value;
+        let numberPool = allNumbersData;
+        
+        if (selectedCountry !== 'random') {
+            numberPool = allNumbersData.filter(row => extractCountryName(row[0]) === selectedCountry);
+        }
+        
+        if (numberPool.length === 0) {
+            randomNumberDisplay.innerHTML = `<p class="text-xl font-mono font-bold text-red-500">No numbers found</p>`;
+            numberError.textContent = `No numbers available for ${selectedCountry}.`;
+            numberError.classList.remove('hidden');
+            return;
+        }
+        
+        numberError.classList.add('hidden');
+        const randomIndex = Math.floor(Math.random() * numberPool.length);
+        const selectedRow = numberPool[randomIndex];
+        
+        const country = extractCountryName(selectedRow[0]);
+        const phoneNumber = selectedRow[2]; // Use the full number
+        currentNumber = phoneNumber;
+
+        randomNumberDisplay.innerHTML = `
+            <span class="text-xl font-semibold text-gray-400 block">${country}</span>
+            <span class="text-4xl sm:text-5xl font-mono font-bold text-primary-color">${phoneNumber}</span>
+        `;
+        
+        updatePremiumStats();
+        showNotification(`New ${country} number generated successfully!`);
+    }
+
+    /**
+     * ✅ FIX: Fetches and displays the list of SMS OTPs with MASKED numbers.
+     */
+    async function fetchSMS() {
+        setSmsLoading(true);
+        otpTableBody.innerHTML = '';
+        smsStatus.textContent = 'Loading SMS data...';
+        smsError.classList.add('hidden');
+
+        try {
+            const response = await fetch(API_SMS);
+            if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+            const data = await response.json();
+
+            if (data && data.aaData) {
+                const validSMS = data.aaData.filter(row => row.length >= 5 && typeof row[0] === 'string' && row[0].includes('-'));
+
+                if (validSMS.length === 0) {
+                    smsStatus.textContent = 'No recent OTP messages found.';
+                    return;
+                }
+
+                let html = '';
+                validSMS.forEach(row => {
+                    const timestamp = row[0];
+                    const countryGroup = row[1];
+                    const country = extractCountryName(countryGroup);
+                    const phone = row[2];
+                    const maskedPhone = maskNumber(phone); // Mask the number here
+                    const service = row[3];
+                    const fullMessage = row[4];
+                    
+                    const formattedMessage = fullMessage.replace(/\n/g, '<br>');
+                    const otpMatch = fullMessage.match(/(\b\d{3}-\d{3}\b|\b\d{3} \d{3}\b|\b\d{3,6}\b)/);
+                    const otpCode = otpMatch ? `<span class="text-primary-color font-extrabold">${otpMatch[0]}</span>` : 'N/A';
+                    
+                    // Create a safe string for the onclick function
+                    const safeMessage = fullMessage.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ");
+
+                    html += `
+                        <tr class="hover:bg-bg-lighter transition duration-150">
+                            <td class="px-3 py-3 text-sm text-gray-400 hidden sm:table-cell">${timestamp}</td>
+                            <td class="px-3 py-3 text-sm font-mono text-gray-300">
+                                <span class="text-xs font-semibold text-primary-color block">${country}</span>
+                                ${maskedPhone} <!-- Use masked number -->
+                            </td>
+                            <td class="px-3 py-3 text-sm text-gray-400 hidden md:table-cell">${service}</td>
+                            <td class="px-3 py-3 text-sm text-gray-200">
+                                <div class="space-y-1">
+                                    <span class="block">${formattedMessage}</span>
+                                    <span class="block pt-1 text-xs text-gray-500">Extracted OTP: ${otpCode}</span>
+                                </div>
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                <button onclick="openAiAnalysis('${safeMessage}')" class="p-2 text-primary-color hover:text-white bg-bg-lighter rounded-md">
+                                    <i data-feather="cpu" class="w-5 h-5"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                otpTableBody.innerHTML = html;
+                feather.replace(); // Refresh icons for AI buttons
+                const totalRecords = data.iTotalDisplayRecords || validSMS.length;
+                smsStatus.textContent = `Displaying ${validSMS.length} of ${totalRecords} total records.`;
+                updatePremiumStats();
+
+            } else {
+                throw new Error("SMS API data is empty or malformed.");
+            }
+        } catch (error) {
+            console.error("Error fetching SMS data:", error);
+            smsStatus.textContent = '';
+            smsError.textContent = `Could not load SMS messages: ${error.message}.`;
+            smsError.classList.remove('hidden');
+        } finally {
+            setSmsLoading(false);
+        }
+    }
+    
+    // --- PREMIUM FEATURE FUNCTIONS ---
+    
+    function toggleAutoRefresh() {
+        const button = document.getElementById('autoRefreshBtn');
+        
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+            autoRefreshInterval = null;
+            button.innerHTML = '<i data-feather="refresh-cw" class="w-4 h-4 inline mr-2"></i> Enable Auto-Refresh';
+            button.classList.remove('bg-green-600', 'hover:bg-green-700');
+            button.classList.add('bg-gradient-to-r', 'from-purple-600', 'to-blue-600', 'hover:from-purple-700', 'hover:to-blue-700');
+            showNotification('Auto-refresh disabled');
+        } else {
+            autoRefreshInterval = setInterval(fetchSMS, 30000);
+            button.innerHTML = '<i data-feather="pause" class="w-4 h-4 inline mr-2"></i> Disable Auto-Refresh';
+            button.classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-blue-600', 'hover:from-purple-700', 'hover:to-blue-700');
+            button.classList.add('bg-green-600', 'hover:bg-green-700');
+            showNotification('Auto-refresh enabled (30 seconds)');
+        }
+        feather.replace();
+    }
+    
+    function searchMessages() {
+        const searchTerm = document.getElementById('searchSMS').value.toLowerCase();
+        const rows = document.querySelectorAll('#otpTableBody tr');
+        let foundCount = 0;
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                row.style.display = '';
+                foundCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        showNotification(`Found ${foundCount} messages matching "${searchTerm}"`);
+    }
+    
+    function exportData(format) {
+        const rows = document.querySelectorAll('#otpTableBody tr');
+        let data = [];
+        
+        rows.forEach(row => {
+            if (row.style.display !== 'none') {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 4) {
+                    data.push({
+                        timestamp: cells[0].textContent,
+                        country: cells[1].querySelector('span').textContent,
+                        phone: cells[1].textContent.replace(cells[1].querySelector('span').textContent, '').trim(),
+                        service: cells[2].textContent,
+                        message: cells[3].textContent
+                    });
+                }
+            }
+        });
+        
+        if (format === 'json') {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'arslan-temp-numbers-export.json';
+            a.click();
+        } else if (format === 'csv') {
+            let csv = 'Timestamp,Country,Phone,Service,Message\n';
+            data.forEach(item => {
+                csv += `"${item.timestamp}","${item.country}","${item.phone}","${item.service}","${item.message.replace(/"/g, '""')}"\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'arslan-temp-numbers-export.csv';
+            a.click();
+        }
+        
+        showNotification(`Data exported as ${format.toUpperCase()} successfully!`);
+    }
+    
+    function copyCurrentNumber() {
+        if (!currentNumber) {
+            showNotification('No number selected to copy', true);
+            return;
+        }
+        
+        navigator.clipboard.writeText(currentNumber).then(() => {
+            showNotification('Phone number copied to clipboard!');
+        }).catch(err => {
+            showNotification('Failed to copy number', true);
+        });
+    }
+    
+    function clearAllData() {
+        if (confirm('Are you sure you want to clear all data? This will reset the current session.')) {
+            otpTableBody.innerHTML = '';
+            currentNumber = '';
+            randomNumberDisplay.innerHTML = '<p class="text-4xl sm:text-5xl font-mono font-bold text-primary-color">Select a number</p>';
+            smsStatus.textContent = 'Data cleared. Refresh to load new messages.';
+            showNotification('All data cleared successfully');
+            updatePremiumStats();
+        }
+    }
+    
+    function showHelp() {
+        aiModalContent.innerHTML = `
+            <h4 class="font-bold text-lg text-primary-color">How to Use Arslan-Temp-Numbers</h4>
+            <div class="space-y-3 text-sm">
+                <p><strong>1.</strong> Select a country or use "Random" for any country</p>
+                <p><strong>2.</strong> Click "Generate Number" to get a temporary phone number</p>
+                <p><strong>3.</strong> Use this number for OTP verification on any service</p>
+                <p><strong>4.</strong> Click "Refresh SMS" to check for new messages</p>
+                <p><strong>5.</strong> Use AI Analysis to understand complex messages</p>
+                <p><strong>6.</strong> Enable auto-refresh for automatic updates</p>
+            </div>
+        `;
+        aiModal.classList.add('show');
+    }
+    
+    function showSupport() {
+        aiModalContent.innerHTML = `
+            <h4 class="font-bold text-lg text-primary-color">Support & Contact</h4>
+            <div class="space-y-4 text-sm">
+                <p>For support, issues, or premium features:</p>
+                <div class="bg-bg-lighter p-3 rounded-lg">
+                    <p class="font-semibold">Developer: ArslanMD Official</p>
+                    <p class="mt-2">📱 WhatsApp: <a href="https://wa.me/message/VRZ5QLDAHXKSF1" class="text-primary-color underline">Contact Now</a></p>
+                    <p class="mt-1">📢 Channel: <a href="https://whatsapp.com/channel/0029VarfjW04tRrmwfb8x306" class="text-primary-color underline">Join Support Channel</a></p>
+                </div>
+                <p class="text-xs text-gray-400">We're here to help you 24/7 with any issues or questions!</p>
+            </div>
+        `;
+        aiModal.classList.add('show');
+    }
+    
+    function saveApiKey() {
+        const apiKey = geminiKeyInput.value;
+        if (apiKey) {
+            localStorage.setItem('geminiApiKey', apiKey);
+            showNotification('Gemini API Key saved successfully!');
+            geminiKeyInput.type = 'password'; // Keep it hidden
+        } else {
+            showNotification('Please enter a valid API key', true);
+        }
+    }
+    
+    // --- GEMINI AI FUNCTIONS ---
+    
+    function openAiAnalysis(message) {
+        let apiKey = geminiKeyInput.value;
+        if (!apiKey) {
+            apiKey = localStorage.getItem('geminiApiKey');
+            if (apiKey) {
+                geminiKeyInput.value = apiKey;
+            }
+        }
+        
+        if (!apiKey) {
+            aiModalContent.innerHTML = `
+                <p class="text-red-400">Please enter your Gemini API Key in the input field at the top of the page first.</p>
+                <p class="text-sm text-gray-400 mt-2">Get your free API key from: <a href="https://aistudio.google.com/" class="text-primary-color underline" target="_blank">Google AI Studio</a></p>
+            `;
+            aiModal.classList.add('show');
+            return;
+        }
+        
+        aiModalContent.innerHTML = `
+            <p class="font-semibold text-gray-400">Original Message:</p>
+            <p class="p-3 bg-bg-dark rounded-lg text-sm">"${message}"</p>
+            <p class="font-semibold text-gray-400 mt-4">AI Analysis:</p>
+            <div class="flex items-center justify-center h-20">
+                <div class="w-8 h-8 border-4 border-primary-color border-t-transparent rounded-full spinning"></div>
+            </div>
+        `;
+        aiModal.classList.add('show');
+        analyzeWithGemini(message, apiKey);
+    }
+    
+    function closeAiModal() {
+        aiModal.classList.remove('show');
+    }
+
+    async function analyzeWithGemini(message, apiKey) {
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        
+        const systemPrompt = "You are an expert message analyzer. Analyze the following SMS message. First, state its purpose (e.g., 'This is a login code', 'This is a marketing alert', 'This is a potential scam'). Second, extract any useful information, like the service name or the OTP code. Be concise and use simple bullet points.";
+        const userQuery = message;
+        
+        const payload = {
+            contents: [{ parts: [{ text: userQuery }] }],
+            systemInstruction: {
+                parts: [{ text: systemPrompt }]
+            },
+        };
+        
+        try {
+            // Exponential backoff
+            let response;
+            let delay = 1000;
+            for (let i = 0; i < 3; i++) { // Retry up to 3 times
+                response = await fetch(GEMINI_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) break; // Success
+                if (response.status === 429 || response.status >= 500) {
+                    // Throttling or server error, wait and retry
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                } else {
+                    // Don't retry on client errors (4xx) other than 429
+                    break;
+                }
+            }
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`API Error ${response.status}: ${errorText}`);
+            }
+
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            if (text) {
+                // Format text for HTML (replace newlines with <br>)
+                const formattedText = text.replace(/\n/g, '<br>');
+                aiModalContent.innerHTML = `
+                    <p class="font-semibold text-gray-400">Original Message:</p>
+                    <p class="p-3 bg-bg-dark rounded-lg text-sm">"${message}"</p>
+                    <p class="font-semibold text-gray-400 mt-4">AI Analysis:</p>
+                    <div class="p-3 bg-bg-dark rounded-lg text-sm">${formattedText}</div>
+                `;
+            } else {
+                throw new Error("No text content found in Gemini response.");
+            }
+        } catch (error) {
+            console.error("Gemini API Error:", error);
+            aiModalContent.innerHTML = `
+                <p class="font-semibold text-gray-400">Original Message:</p>
+                <p class="p-3 bg-bg-dark rounded-lg text-sm">"${message}"</p>
+                <p class="font-semibold text-red-400 mt-4">Analysis Failed:</p>
+                <p class="p-3 bg-red-900 bg-opacity-30 text-red-300 rounded-lg text-sm">${error.message}</p>
+            `;
+        }
+    }
+    
+    // --- INITIALIZATION ---
+
+    // Initial data load
+    document.addEventListener('DOMContentLoaded', () => {
+        feather.replace(); // Load initial icons
+        
+        // Load saved API key
+        const savedApiKey = localStorage.getItem('geminiApiKey');
+        if (savedApiKey) {
+            geminiKeyInput.value = savedApiKey;
+        }
+        
+        fetchNumbersList(); // Fetch number list once
+        fetchSMS(); // Fetch SMS list once
+        
+        // Add event listeners
+        generateBtn.addEventListener('click', displayNewNumber);
+        refreshSmsBtn.addEventListener('click', fetchSMS);
+        
+        // Add Enter key listener for search
+        document.getElementById('searchSMS').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchMessages();
+            }
+        });
+        
+        // Add country change listener
+        countrySelect.addEventListener('change', displayNewNumber);
+    });
+  </script>
+</body>
+</html>
